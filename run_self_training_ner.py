@@ -65,14 +65,6 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-ALL_MODELS = sum(
-    (
-        tuple(conf.pretrained_config_archive_map.keys())
-        for conf in (BertConfig, RobertaConfig, DistilBertConfig, CamembertConfig, XLMRobertaConfig)
-    ),
-    (),
-)
-
 MODEL_CLASSES = {
     "bert": (BertConfig, BERTForTokenClassification_v2, BertTokenizer),
     "roberta": (RobertaConfig, RobertaForTokenClassification_v2, RobertaTokenizer),
@@ -440,7 +432,7 @@ def main():
         default=None,
         type=str,
         required=True,
-        help="Path to pre-trained model or shortcut name selected in the list: " + ", ".join(ALL_MODELS),
+        help="Path to pre-trained model or shortcut name"
     )
     parser.add_argument(
         "--output_dir",
@@ -714,24 +706,31 @@ def main():
         model = model_class.from_pretrained(args.output_dir)
         model.to(args.device)
 
-        if not best_test:
-            best_test = [0, 0, 0]
-        result, predictions, _, _ = evaluate(args, model, tokenizer, labels, pad_token_label_id, best=best_test, mode="test")
-        # Save results
-        output_test_results_file = os.path.join(args.output_dir, "test_results.txt")
-        with open(output_test_results_file, "w") as writer:
-            for key in sorted(result.keys()):
-                writer.write("{} = {}\n".format(key, str(result[key])))
-        # Save predictions
-        output_test_predictions_file = os.path.join(args.output_dir, "test_predictions.txt")
-        with open(output_test_predictions_file, "w") as writer:
-            with open(os.path.join(args.data_dir, "test.json"), "r") as f:
-                example_id = 0
-                data = json.load(f)
-                for item in data:
-                    output_line = str(item["str_words"]) + " " + predictions[example_id].pop(0) + "\n"
-                    writer.write(output_line)
-                    example_id += 1
+        best_split = {
+            "dev": best_dev if best_dev else [0, 0, 0],
+            "test": best_test if best_test else [0, 0, 0],
+        }
+        for split in ["dev", "test"]:
+            best = best_split[split]
+            result, predictions, _, _ = evaluate(args, model, tokenizer, labels, pad_token_label_id, best=best, mode=split)
+            # Save results
+            output_results_file = os.path.join(args.output_dir, f"{split}_results.txt")
+            with open(output_results_file, "w") as writer:
+                for key in sorted(result.keys()):
+                    writer.write("{} = {}\n".format(key, str(result[key])))
+            # Save predictions
+            output_predictions_file = os.path.join(args.output_dir, f"{split}_predictions.txt")
+            with open(output_predictions_file, "w") as writer:
+                with open(os.path.join(args.data_dir, f"{split}.json"), "r") as f:
+                    example_id = 0
+                    data = json.load(f)
+                    for item in data:
+                        # output_line = str(item["str_words"]) + " " + predictions[example_id].pop(0) + "\n"
+                        tags = item["tags"]
+                        golden_labels = [labels[tag] for tag in tags]
+                        output_line = str(item["str_words"]) + "\n" + str(golden_labels)+"\n"+str(predictions[example_id]) + "\n"
+                        writer.write(output_line)
+                        example_id += 1
 
     return results
 
