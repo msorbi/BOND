@@ -1,3 +1,34 @@
+# BOND for Historical NER
+
+Fork of [cliang1453/BOND](https://github.com/cliang1453/BOND) with added datasets. Work in progress.
+
+## Historical NER Instructions
+
+### Datasets preparation
+- `source scripts/prepare_hdsner.sh`
+  - clones the datasets submodule
+  - creates the datasets conda environment
+  - downloads and pre-processes the datasets, with sequence length 64
+
+### Environment setup
+This is the setup of the model environment, which differs from the one in the submodule. \
+`conda env create -n BOND -f environment.yml` \
+`conda activate BOND`
+
+### Format data and run model
+`bash scripts/run_hdsner.sh supervised` # supervised setting \
+`bash scripts/run_hdsner.sh distant` # distantly-supervised setting \
+Results will be in `outputs/hdsner-DATASET_(supervised|distant)`. \
+**NOTE**: this will overwrite previous results of the same supervision method.
+
+### Evaluate results
+- `source scripts/eval_hdsner.sh`
+  - activates the datasets environment
+  - evaluates results, writing to `dataset/hdsner_report_(dev|test).json`
+    - it contains both supervised and distant results, if previously run, in the same file
+
+# Forked Readme
+
 # BOND
 This repo contains our code and pre-processed distantly/weakly labeled data for paper [BOND: BERT-Assisted Open-Domain Name Entity Recognition with Distant Supervision (KDD2020)](https://arxiv.org/abs/2006.15509)
 
