@@ -1,5 +1,6 @@
 outputs/
 pretrained_model/
+dataset/hdsner*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
