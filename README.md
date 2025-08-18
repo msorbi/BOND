@@ -5,24 +5,31 @@ Fork of [cliang1453/BOND](https://github.com/cliang1453/BOND) with added dataset
 ## Historical NER Instructions
 
 ### Datasets preparation
-- `source scripts/prepare_hdsner.sh`
+```bash
+source scripts/prepare_hdsner.sh
+```
   - clones the datasets submodule
   - creates the datasets conda environment
   - downloads and pre-processes the datasets, with sequence length 64
 
 ### Environment setup
-This is the setup of the model environment, which differs from the one in the submodule. \
-`conda env create -n BOND -f environment.yml` \
-`conda activate BOND`
+This is the setup of the model environment, which differs from the one in the submodule.
+```bash
+conda env create -n BOND -f environment.yml
+conda activate BOND
+```
 
 ### Format data and run model
-`bash scripts/run_hdsner.sh supervised` # supervised setting \
-`bash scripts/run_hdsner.sh distant` # distantly-supervised setting \
-Results will be in `outputs/hdsner-DATASET_(supervised|distant)`. \
-**NOTE**: this will overwrite previous results of the same supervision method.
+```bash
+bash scripts/run_hdsner.sh
+```
+Results will be in `outputs/hdsner-DATASET_(Fully|Dist*)`. \
+**NOTE**: This will overwrite previous results.
 
 ### Evaluate results
-- `source scripts/eval_hdsner.sh`
+```bash
+source scripts/eval_hdsner.sh
+```
   - activates the datasets environment
   - evaluates results, writing to `dataset/hdsner_report_(dev|test).json`
     - it contains both supervised and distant results, if previously run, in the same file
